@@ -1,0 +1,43 @@
+.space-out {
+  margin: 0 0 -10px 10px;
+}
+
+.left-down-margin {
+  margin: 20px 0 10px 0;
+}
+
+input {
+  margin: 0 0 0 10px;
+}
+
+:focus {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--pcdc-color__primary-light), 0 0 0 3px white;
+}
+
+.g3-button--primary {
+  border: 1px solid var(--g3-primary-btn__border-color);
+  background-color: var(--g3-primary-btn__bg-color);
+  color: var(--g3-primary-btn__color);
+  fill: var(--g3-primary-btn__color);
+  margin: 20px 0 0 20px;
+}
+
+.g3-button--primary:hover,
+.g3-button--primary:hover svg path {
+  border: 1px solid var(--g3-primary-btn__border-color--hover);
+  background-color: var(--g3-primary-btn__bg-color--hover);
+}
+
+.g3-button--primary:active {
+  border: 1px solid var(--g3-primary-btn__border-color--active);
+}
+
+.g3-button--primary .g3-button__icon {
+  background-color: var(--g3-primary-btn__color);
+}
+
+.error-msg {
+  color: red;
+  margin-top: 10px;
+}

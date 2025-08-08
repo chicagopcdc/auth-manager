@@ -1,0 +1,89 @@
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import TableRow, { cellValueToText } from './TableRow';
+import TableHead from './TableHead';
+import './Table.css';
+
+function Table({
+  title = '',
+  header = [],
+  data = [],
+  filterConfig = {},
+  handleClickRow
+}) {
+  const [filterArray, setFilters] = useState([]);
+  const [filteredData, setData] = useState(data);
+
+  useEffect(() => {
+    setData(
+      data.filter((row) =>
+        row.every((value, j) => {
+          const text = cellValueToText(value);
+          const filterValue = filterArray[j];
+          if (!filterValue) {
+            return true;
+          }
+          if (
+            typeof filterValue === 'object' &&
+            Object.hasOwn(filterValue, 'start')
+          ) {
+            const valueDate = new Date(value);
+            return (
+              new Date(`${filterValue.start}T00:00:00.000`) <= valueDate &&
+              valueDate <=
+                new Date(`${filterValue.end.add({ days: 1 })}T00:00:00.000`)
+            );
+          }
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) {
+              return true;
+            }
+            return filterValue.some(
+              (filterString) =>
+                value.includes?.(filterString) || text.includes(filterString)
+            );
+          }
+          if (typeof filterValue === 'number') {
+            return filterValue > 0 && value <= filterValue;
+          }
+          return text.includes(filterArray[j]);
+        })
+      )
+    );
+  }, [filterArray, data]);
+
+  return (
+    <>
+      {title ? <h2>{title}</h2> : null}
+      <div className='base-table'>
+        <table className='base-table__body'>
+          <TableHead
+            cols={header}
+            data={data}
+            setFilters={setFilters}
+            filterConfig={filterConfig}
+          />
+          <tbody>
+            {filteredData.map((row, i) => (
+              <TableRow
+                key={`${title}_${i}`}
+                cols={row}
+                onClick={() => handleClickRow(row)}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+Table.propTypes = {
+  title: PropTypes.string,
+  header: PropTypes.array,
+  data: PropTypes.array,
+  footer: PropTypes.array,
+  filterConfig: PropTypes.object
+};
+
+export default Table;

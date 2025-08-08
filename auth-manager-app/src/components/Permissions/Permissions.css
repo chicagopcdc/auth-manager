@@ -1,0 +1,19 @@
+.line-break-below {
+  margin-bottom: 20px;
+}
+
+.line-break-above {
+  margin-top: 20px;
+}
+
+.line-break {
+  margin: 20px 0 20px 20px;
+}
+
+.user-info p {
+  padding-bottom: 10px;
+}
+
+.user-info strong {
+  margin-left: 0px;
+}

@@ -1,0 +1,27 @@
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+
+  padding: 15px;
+  border: 3px solid var(--pcdc-color__primary-dark);
+  background: var(--pcdc-color__primary);
+  color: white;
+  cursor: pointer;
+}
+
+.modal h2 {
+  color: white;
+  margin: 0 0 10px 0;
+}
+
+.modal p {
+  font-size: 16px;
+  margin: 0 0 15px 0;
+}
+
+.modal button {
+  margin: 0 0 0 0;
+}

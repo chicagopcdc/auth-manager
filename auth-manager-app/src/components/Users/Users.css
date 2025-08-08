@@ -1,0 +1,21 @@
+.user-table {
+  border-collapse: collapse;
+  width: 70%;
+}
+
+.user-table td,
+th {
+  text-align: left;
+  border: 1px solid rgb(146, 142, 142);
+  padding: 5px;
+}
+
+.user-table th {
+  background-color: rgb(175, 235, 249);
+  padding: 10px;
+}
+
+strong {
+  font-size: 16px;
+  margin-left: 20px;
+}
