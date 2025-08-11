@@ -39,7 +39,7 @@ export const fetchUserInfo = createAsyncThunk(
         }
       });
       if (!response.ok) {
-        rejectWithValue(`Failed to fetch data: ${response.status}`);
+        return rejectWithValue(response.status);
       }
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
@@ -49,7 +49,7 @@ export const fetchUserInfo = createAsyncThunk(
       let json = await response.json();
       return json;
     } catch (e) {
-      return rejectWithValue(e);
+      return rejectWithValue(e.response?.status);
     }
   }
 );
