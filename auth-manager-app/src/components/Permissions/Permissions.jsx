@@ -1,16 +1,10 @@
 import { Link } from 'react-router-dom';
 import TransferList from '../TransferList/TransferList';
-import { useEffect } from 'react';
-import { fetchTotalPermissions, fetchUserInfo } from './PermissionsThunks';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import './Permissions.css';
 
 function Permissions() {
   let policiesList = [];
-
-  // TODO: do something about error
-  // GET https://portal-dev.pedscommons.org/user/admin/arborist_user/starbix99@gmail.com
-  // use RTK for state management?
 
   const permissionsStatus = useSelector(
     (state) => state.permissionsSlice.permissionsStatus
@@ -21,7 +15,6 @@ function Permissions() {
   const statusSuccess =
     permissionsStatus === 'success' && userInfoStatus === 'success';
 
-  const authKey = useSelector((state) => state.loginSlice.authKey);
   const totalPermissions = useSelector(
     (state) => state.permissionsSlice.totalPermissions
   );
@@ -40,7 +33,6 @@ function Permissions() {
       secondList: selectedPolicies
     };
   }
-  console.log('userInfoStatus: ', userInfoStatus);
 
   return (
     <>

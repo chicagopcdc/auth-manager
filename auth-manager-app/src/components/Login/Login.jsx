@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginActions } from './LoginSlice';
@@ -18,7 +17,6 @@ function Login() {
     'portal-dev.pedscommons.org',
     'gearbox-dev.pedscommons.org'
   ];
-  const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const loginData = useSelector((state) => state.loginSlice);
@@ -52,7 +50,7 @@ function Login() {
   const handleSubmit = async (authKey, envir) => {
     const { isValid, msg } = validateLogin(authKey, envir);
     if (!isValid) {
-      setErrorMsg(msg);
+      dispatch(loginActions.setErrorMsg(msg));
       return;
     }
     try {
@@ -60,10 +58,16 @@ function Login() {
       if (response && fetchUsers.fulfilled.match(response)) {
         navigate('/users');
       } else {
-        setErrorMsg('Your authentication key is incorrect. Please try again.');
+        dispatch(
+          loginActions.setErrorMsg(
+            'Your authentication key is incorrect. Please try again.'
+          )
+        );
       }
     } catch (e) {
-      setErrorMsg('An expected error occured. Please try again.');
+      dispatch(
+        loginActions.setErrorMsg('An expected error occured. Please try again.')
+      );
     }
   };
 
@@ -105,9 +109,9 @@ function Login() {
           onClick={() => handleSubmit(loginData.authKey, loginData.envir)}>
           Submit
         </button>
-        {errorMsg !== 'You are successfully authenticated.' && (
+        {loginData.errorMsg !== 'You are successfully authenticated.' && (
           <div>
-            <p className='error-msg'>{errorMsg}</p>
+            <p className='error-msg'>{loginData.errorMsg}</p>
           </div>
         )}
       </div>

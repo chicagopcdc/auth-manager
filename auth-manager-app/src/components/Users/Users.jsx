@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { usersSliceActions } from '../Users/UsersSlice';
+import { loginActions } from '../Login/LoginSlice';
 import {
   fetchTotalPermissions,
   fetchUserInfo
@@ -31,17 +32,28 @@ function Users() {
       last_name: row[2],
       institution: row[3]
     };
-    dispatch(usersSliceActions.setClickedUser(userInfo));
 
+    dispatch(usersSliceActions.setClickedUser(userInfo));
     dispatch(fetchTotalPermissions(authKey));
-    const userInfoResponse = await dispatch(
+
+    const resultAction = await dispatch(
       fetchUserInfo({ authKey, username: row[0] })
     );
-    // if failed to fetch permissions info for this specific user
-    if (userInfoResponse && fetchUserInfo.rejected.match(userInfoResponse)) {
-      setErrorMsg('This user was not found in our database.');
-    } else {
+    if (fetchUserInfo.fulfilled.match(resultAction)) {
       navigate('/permissions');
+    } else if (fetchUserInfo.rejected.match(resultAction)) {
+      const status = resultAction.payload;
+      console.log('Request rejected with status:', status);
+      if (status === 404) {
+        setErrorMsg('This user could not be found in our database');
+      } else if (status === 401) {
+        dispatch(
+          loginActions.setErrorMsg(
+            'Your authentication key has expired. Please try again.'
+          )
+        );
+        navigate('/');
+      }
     }
   }
 
