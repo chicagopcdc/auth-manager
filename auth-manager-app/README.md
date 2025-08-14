@@ -1,6 +1,6 @@
 # Authentication Manager
 
-This app displays user's roles, and allows super-admins to assign permissions to users.
+This app displays registered users' roles for a selected domain (e.g. `https://portal-dev.pedscommons.org`), and allows admins to manage permissions for users.
 
 This app uses vite with the Javascript variant of React.
 
