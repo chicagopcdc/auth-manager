@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginActions } from './LoginSlice';
 import { fetchUsers } from '../Users/UsersThunk';
+import Spinner from '../Spinner/Spinner';
+import { setItemWithTimeout } from '../../utils';
 import './Login.css';
 
 /**
@@ -19,43 +21,46 @@ function Login() {
   ];
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const loginData = useSelector((state) => state.loginSlice);
+  const loginData = useSelector((state) => state.login);
+  const fetchUsersStatus = useSelector((state) => state.users.status);
 
   /**
-   * Validates the login. Returns whether or not it is valid (bool) and an error/success message (msg).
-   * @param {string} authKey
-   * @param {string} envir
+   * Checks for empty input in the login. Returns whether or not it is partially empty (bool) and an error/success message (msg).
+   * @param {string} authKey - the authentication key, from Login
+   * @param {string} envir - the selected environment, from Login
    * @returns {ValidateObject} an object of {bool, msg}
    */
-  function validateLogin(authKey, envir) {
-    if (envir === '') {
+  function isEmptyLogin(authKey, envir) {
+    if (!envir)
       return {
-        isValid: false,
+        isEmpty: true,
         msg: 'Please select an environment and submit again.'
       };
-    }
-    if (authKey.trim() === '') {
+    if (!authKey.trim())
       return {
-        isValid: false,
+        isEmpty: true,
         msg: 'Your authentication key is empty. Please try again.'
       };
-    }
-
-    return {
-      isValid: true,
-      msg: 'You are successfully authenticated.'
-    };
+    return { isEmpty: false, msg: 'You are successfully authenticated.' };
   }
 
+  /**
+   * handles submissions by validating the login of the user
+   * @param {string} authKey - the authentication key, from Login
+   * @param {string} envir - the selected environment, from Login
+   */
   const handleSubmit = async (authKey, envir) => {
-    const { isValid, msg } = validateLogin(authKey, envir);
-    if (!isValid) {
+    sessionStorage.removeItem('userInfo');
+    dispatch(loginActions.setErrorMsg(''));
+    const { isEmpty, msg } = isEmptyLogin(authKey, envir);
+    if (isEmpty) {
       dispatch(loginActions.setErrorMsg(msg));
       return;
     }
     try {
-      const response = await dispatch(fetchUsers(authKey));
+      const response = await dispatch(fetchUsers({ authKey, envir }));
       if (response && fetchUsers.fulfilled.match(response)) {
+        setItemWithTimeout('loginData', { authKey, envir }, 20);
         navigate('/users');
       } else {
         dispatch(
@@ -109,9 +114,12 @@ function Login() {
           onClick={() => handleSubmit(loginData.authKey, loginData.envir)}>
           Submit
         </button>
+        {fetchUsersStatus === 'loading' && <Spinner />}
         {loginData.errorMsg !== 'You are successfully authenticated.' && (
           <div>
-            <p className='error-msg'>{loginData.errorMsg}</p>
+            <p className='msg' style={{ color: 'red' }}>
+              {loginData.errorMsg}
+            </p>
           </div>
         )}
       </div>

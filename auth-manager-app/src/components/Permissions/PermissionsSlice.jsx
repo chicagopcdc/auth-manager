@@ -1,55 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { fetchTotalPermissions, fetchUserInfo } from './PermissionsThunks';
 
-const PermissionsSlice = createSlice({
-  name: 'permissions',
+const DisplayPermissionsSlice = createSlice({
+  name: 'displayPermissions',
   initialState: {
     totalPermissions: [],
     userInfo: {},
     permissionsStatus: 'idle',
-    userInfoStatus: 'idle'
+    userInfoStatus: 'idle',
+    saveMsg: ''
   },
   reducers: {
-    //   transferToSecond(state) {
-    //     state.selected = {
-    //       firstList: [],
-    //       secondList: [...state.selected.secondList]
-    //     };
-    //     state.firstList = state.firstList.filter(
-    //       (item) => !selected.firstList.includes(item)
-    //     );
-    //     state.secondList = [...state.secondList, ...state.selected.firstList];
-    //   },
-    //   transferToFirst(state) {
-    //     state.secondList = state.secondList.filter(
-    //       (item) => !selected.secondList.includes(item)
-    //     );
-    //     state.firstList = [...state.firstList, ...state.selected.secondList];
-    //     state.selected = {
-    //       firstList: [...state.selected.firstList],
-    //       secondList: []
-    //     };
-    //   },
-    //   handleItemSelected(state, action) {
-    //     if (state.secondList.includes(action.itemName)) {
-    //       state.selected = {
-    //         ...state.selected,
-    //         secondList: state.selected.secondList.filter(
-    //           (s) => s !== action.itemName
-    //         )
-    //       };
-    //     } else if (state.selected.firstList.includes(itemName)) {
-    //       state.selected = {
-    //         ...state.selected,
-    //         firstList: prev.firstList.filter((s) => s !== itemName)
-    //       };
-    //     } else {
-    //       state.selected = {
-    //         ...state.selected,
-    //         [action.listStr]: [...state.selected[listStr], itemName]
-    //       };
-    //     }
-    //   }
+    setSaveMsg(state, action) {
+      state.saveMsg = action.payload;
+    }
   },
 
   extraReducers: (builder) => {
@@ -77,5 +41,5 @@ const PermissionsSlice = createSlice({
   }
 });
 
-export default PermissionsSlice.reducer;
-export const permissionsActions = PermissionsSlice.actions;
+export default DisplayPermissionsSlice.reducer;
+export const displayPermissionsActions = DisplayPermissionsSlice.actions;

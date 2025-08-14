@@ -9,6 +9,10 @@ const usersSlice = createSlice({
     clickedUser: {}
   },
   reducers: {
+    /**
+     * sets state.clickedUser, which will contain properties: username, first_name,
+     *  last_name, institution, and will be used in Permissions.jsx
+     */
     setClickedUser(state, action) {
       state.clickedUser = action.payload;
     }
