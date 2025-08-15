@@ -10,6 +10,7 @@
   background: var(--pcdc-color__primary);
   color: white;
   cursor: pointer;
+  max-width: 500px;
 }
 
 .modal h2 {

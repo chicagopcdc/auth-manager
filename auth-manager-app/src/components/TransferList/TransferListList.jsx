@@ -1,11 +1,11 @@
 /**
  *
  * @typedef {Object} TransferListListProps
- * @property {string} title
- * @property {string} name
- * @property {string[]} items
- * @property {(itemName: string, listStr:string) => selectedObject} handleItemSelected
- * @property {selectedObject} selected
+ * @property {string} title the display title 
+ * @property {string} name the name of the transferlist list: 'firstList' or 'secondList'
+ * @property {string[]} items the items inside that list, e.g. shuttleList.secondList
+ * @property {(itemName: string, listStr:string) => selectedObject} handleItemSelected a function that handles item selection
+ * @property {selectedObject} selected contains firstList and secondList arrays
  
  * @typedef {Object} selectedObject
  * @property {string[]} firstList

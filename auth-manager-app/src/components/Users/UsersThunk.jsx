@@ -1,24 +1,33 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
+/**
+ * fetches users based on the selected environment and login
+ * @param {string} authKey - the authentication key, from Login
+ * @param {string} envir - the selected environment, from Login
+ */
 export const fetchUsers = createAsyncThunk(
   'users/fetchUsers',
-  async function getUsers(authKey) {
+  async ({ authKey, envir }, {}) => {
     try {
-      const response = await fetch(
-        'https://portal-dev.pedscommons.org/user/admin/users',
-        {
-          headers: {
-            Authorization: `Bearer ${authKey}`
-          }
-        }
-      );
+      const url = `https://${envir}/user/admin/users`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${authKey}`
+        },
+        signal: AbortSignal.timeout(2500)
+      });
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        console.error(`Error: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error(`Expected JSON, got: ${text.substring(0, 100)}`);
       }
       const json = await response.json();
       return json.users;
     } catch (e) {
-      throw new Error('Fetch error:', e);
+      console.error(`Error: ${response.status}`);
     }
   }
 );

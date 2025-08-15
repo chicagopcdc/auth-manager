@@ -1,15 +1,22 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
+/**
+ * fetches the total available permissions in a certain environment,
+ * to be stored in state.displayPermissions.totalPermissions
+ * @param {string} authKey - the authentication key, from Login
+ * @param {string} envir - the selected environment, from Login
+ */
 export const fetchTotalPermissions = createAsyncThunk(
-  'permissions/fetchTotalPermissions',
-  async (authKey, { rejectWithValue }) => {
+  'displayPermissions/fetchTotalPermissions',
+  async ({ authKey, envir }, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        'https://portal-dev.pedscommons.org/user/admin/list_policies',
+        `https://${envir}/user/admin/list_policies`,
         {
           headers: {
             Authorization: `Bearer ${authKey}`
-          }
+          },
+          signal: AbortSignal.timeout(2500)
         }
       );
       if (!response.ok) {
@@ -28,15 +35,23 @@ export const fetchTotalPermissions = createAsyncThunk(
   }
 );
 
+/**
+ * fetches the userInfo, which includes a user's selected permissions, to be stored
+ * in state.displayPermissions.userInfo
+ * @param {string} authKey - the authentication key, from Login
+ * @param {string} username - the username of the user row being clicked, from Users
+ * @param {string} envir - the selected environment, from Login
+ */
 export const fetchUserInfo = createAsyncThunk(
-  'permissions/fetchUserInfo',
-  async ({ authKey, username }, { rejectWithValue }) => {
+  'displayPermissions/fetchUserInfo',
+  async ({ authKey, username, envir }, { rejectWithValue }) => {
     try {
-      const url = `https://portal-dev.pedscommons.org/user/admin/arborist_user/${username}`;
+      const url = `https://${envir}/user/admin/arborist_user/${username}`;
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${authKey}`
-        }
+        },
+        signal: AbortSignal.timeout(2500)
       });
       if (!response.ok) {
         return rejectWithValue(response.status);
