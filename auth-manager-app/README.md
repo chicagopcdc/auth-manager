@@ -10,6 +10,8 @@ This app uses vite with the Javascript variant of React.
 
 `npm run dev` to start the development server
 
+If the screen goes blank, please refresh the page and the error will resolve.
+
 The Login page requires the authentication key, which is the `access_token`, found in the developer console -> Application while you are logged into your domain.
 
 The authentication manager times out every 20 minutes when your authentication key expires.

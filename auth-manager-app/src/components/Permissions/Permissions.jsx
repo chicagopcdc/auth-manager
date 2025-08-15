@@ -58,7 +58,7 @@ function Permissions() {
     if (Object.keys(userInfo).length === 0) {
       const userInfo = getItemWithTimeout('userInfo');
       const loginData = getItemWithTimeout('loginData');
-      if (!userInfo || !loginData) {
+      if (!userInfo || !loginData || !loginData.authKey || !loginData.envir) {
         authExpire(dispatch, navigate);
       }
       dispatch(usersSliceActions.setClickedUser(userInfo));

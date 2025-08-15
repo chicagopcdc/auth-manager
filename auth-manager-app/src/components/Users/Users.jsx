@@ -68,7 +68,7 @@ function Users() {
       if (userInfoStatus === 404) {
         // calls up error modal
         setErrorMsg('This user could not be found in our arborist database');
-      } else if (userInfoStatus === 401) {
+      } else {
         // redirects back to login
         authExpire(dispatch, navigate);
       }
@@ -76,9 +76,10 @@ function Users() {
   }
 
   useEffect(() => {
+    console.log(status);
     if (userData.length === 0 && status == 'idle') {
       const loginData = getItemWithTimeout('loginData');
-      if (!loginData.authKey || !loginData.envir) {
+      if (!loginData || !loginData.authKey || !loginData.envir) {
         authExpire(dispatch, navigate);
       }
       dispatch(loginActions.setAuth(loginData.authKey));
@@ -87,13 +88,11 @@ function Users() {
         fetchUsers({ authKey: loginData.authKey, envir: loginData.envir })
       ).then((result) => {
         if (fetchUsers.rejected.match(result)) {
-          if (result.payload === 401) {
-            authExpire(dispatch, navigate);
-          }
+          authExpire(dispatch, navigate);
         }
       });
     }
-  }, []);
+  }, [userData, status]);
 
   return (
     <>

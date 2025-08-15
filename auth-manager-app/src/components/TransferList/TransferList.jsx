@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { displayPermissionsActions } from '../Permissions/PermissionsSlice';
 import { changePermissionsActions } from '../Permissions/ChangePermissionsSlice';
 import Modal from '../Modal/Modal';
+import { authExpire } from '../../utils';
+import { useNavigate } from 'react-router-dom';
 
 function TransferList({ title1, title2, initList }) {
   /**
@@ -19,6 +21,7 @@ function TransferList({ title1, title2, initList }) {
   const [errMsg, setErrMsg] = useState('');
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const authKey = useSelector((state) => state.login.authKey);
   const username = useSelector((state) => state.users.clickedUser.username);
   const envir = useSelector((state) => state.login.envir);
@@ -149,8 +152,7 @@ function TransferList({ title1, title2, initList }) {
     if (removePolicy.rejected.match(result)) {
       dispatch(changePermissionsActions.setStatus('failed'));
       setErrMsg(
-        `Status: ${statusNumber}. Failed to remove policies from username ${username}, in environment '${envir}'. 
-          This change has not gone through. Please try again.`
+        `Status: ${statusNumber}. Failed to remove policies from username ${username}, in environment '${envir}'. `
       );
     } else if (removePolicy.fulfilled.match(result)) {
       dispatch(
@@ -177,8 +179,7 @@ function TransferList({ title1, title2, initList }) {
     if (addPolicy.rejected.match(result)) {
       dispatch(changePermissionsActions.setStatus('failed'));
       setErrMsg(
-        `Status: ${statusNumber}. Failed to add policy '${policy_name}' to username ${username}, in environment '${envir}'. 
-          This change has not gone through. Please try again.`
+        `Status: ${statusNumber}. Failed to add policy '${policy_name}' to username ${username}, in environment '${envir}'.`
       );
     } else if (addPolicy.fulfilled.match(result)) {
       dispatch(
@@ -191,8 +192,7 @@ function TransferList({ title1, title2, initList }) {
   }
 
   function modalOnExit() {
-    setErrMsg('');
-    window.location.reload(true);
+    authExpire(dispatch, navigate);
   }
 
   return (
