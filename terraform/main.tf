@@ -77,6 +77,8 @@ module "acm_cert" {
 
 
 resource "aws_wafv2_ip_set" "allowed_ips" {
+  provider           = aws.use1
+
   name               = "${var.app_name}-${var.env_name}-allowed-ips"
   scope              = "CLOUDFRONT"
   ip_address_version = "IPV4"
@@ -84,6 +86,8 @@ resource "aws_wafv2_ip_set" "allowed_ips" {
   addresses = ["205.208.0.0/17", "128.135.0.0/16", "165.68.0.0/16"]
 }
 resource "aws_wafv2_web_acl" "restrict_ips" {
+  provider           = aws.use1
+  
   name  = "${var.app_name}-${var.env_name}-acl"
   scope = "CLOUDFRONT"
 
