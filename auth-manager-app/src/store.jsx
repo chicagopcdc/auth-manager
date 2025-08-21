@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import loginReducer from './components/Login/LoginSlice';
 import usersReducer from './components/Users/UsersSlice';
 import permissionsReducer from './components/Permissions/PermissionsSlice';
+import changePermissionsReducer from './components/Permissions/ChangePermissionsSlice';
 
 const store = configureStore({
   reducer: {
-    loginSlice: loginReducer,
-    usersSlice: usersReducer,
-    permissionsSlice: permissionsReducer
+    login: loginReducer,
+    users: usersReducer,
+    displayPermissions: permissionsReducer,
+    changePermissions: changePermissionsReducer
   }
 });
 export default store;

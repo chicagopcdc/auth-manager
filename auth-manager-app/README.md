@@ -1,6 +1,6 @@
 # Authentication Manager
 
-This app displays user's roles, and allows super-admins to assign permissions to users.
+This app displays registered users' roles for a selected domain (e.g. `https://portal-dev.pedscommons.org`), and allows admins to manage permissions for users.
 
 This app uses vite with the Javascript variant of React.
 
@@ -10,6 +10,10 @@ This app uses vite with the Javascript variant of React.
 
 `npm run dev` to start the development server
 
-## Prerequisites
+If the screen goes blank, please refresh the page and the error will resolve.
 
-This Status Page requires the following to run:
+The Login page requires the authentication key, which is the `access_token`, found in the developer console -> Application while you are logged into your domain.
+
+The authentication manager times out every 20 minutes when your authentication key expires.
+
+To change the available environments, modify the `ENVIRONMENTS` variable in `Login.jsx`.

@@ -37,7 +37,6 @@ input {
   background-color: var(--g3-primary-btn__color);
 }
 
-.error-msg {
-  color: red;
+.msg {
   margin-top: 10px;
 }

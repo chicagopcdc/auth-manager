@@ -54,3 +54,8 @@
   font-size: 14px;
   padding: 7px;
 }
+
+.err-msg {
+  color: red;
+  font-size: 14px;
+}
