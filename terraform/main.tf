@@ -124,7 +124,7 @@ resource "aws_wafv2_web_acl" "restrict_ips" {
 }
 
 module "cloudfront" {
-  source                          = "git::ssh://git@github.com/chicagopcdc/terraform_modules.git//aws/cloudfront?ref=dev"
+  source                          = "git::ssh://git@github.com/chicagopcdc/terraform_modules.git//aws/cloudfront?ref=1.0.1"
   
   domain_alias                    = "${local.domain_url}"
   bucket_regional_domain_name     = module.s3_website.bucket_regional_domain_name
