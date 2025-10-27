@@ -17,3 +17,4 @@ The Login page requires the authentication key, which is the `access_token`, fou
 The authentication manager times out every 20 minutes when your authentication key expires.
 
 To change the available environments, modify the `ENVIRONMENTS` variable in `Login.jsx`.
+
