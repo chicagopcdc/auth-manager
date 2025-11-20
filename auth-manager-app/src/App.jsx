@@ -11,6 +11,14 @@ function App() {
         <Route path='/users' element={<Users />} />
         <Route path='/permissions' element={<Permissions />} />
       </Routes>
+
+      <footer style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.9rem' }}>
+          <p>
+            <a href="https://docs.pedscommons.org/PcdcPrivacyNotice/" target="_blank" rel="noopener noreferrer">
+              Privacy Policy
+            </a>
+          </p>
+        </footer>
     </BrowserRouter>
   );
 }
