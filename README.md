@@ -1,22 +1,40 @@
 # Authentication Manager
 
-This app displays registered users' roles for a selected domain (e.g. `https://portal-dev.pedscommons.org`), and allows admins to manage permissions for users.
+This application allows administrators to manage user permissions and view registered roles for selected domains (e.g., `https://portal-dev.pedscommons.org`).
 
-This app uses vite with the Javascript variant of React.
+## Prerequisites
+* **Node.js**: v18.0.0 or higher (recommended)
+* **npm**: v9.0.0 or higher
 
 ## Getting Started
 
-`npm install` when opening the repo for the first time
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-`npm run dev` to start the development server
+2. **Launch development server**:
+   ```bash
+   npm run dev
+   ```
 
-If the screen goes blank, please refresh the page and the error will resolve.
+## Authentication
 
-The Login page requires the authentication key, which is the `access_token`, found in the developer console -> Application while you are logged into your domain.
+To use the manager, you need an `access_token` from your target domain:
 
-The authentication manager times out every 20 minutes when your authentication key expires.
+1. **Log in** to your domain (e.g., the PEDS portal).
+2. **Open Developer Tools** (F12) -> **Application** tab.
+3. **Locate the `access_token`** in Local Storage or Cookies.
+4. **Paste this token** into the Login page of the Authentication Manager.
 
-To change the available environments, modify the `ENVIRONMENTS` variable in `Login.jsx`.
+> **Note**: The session automatically expires every **20 minutes**. You will need to refresh your token from the source domain once it times out.
 
+## Configuration
 
+To add or change available environments, modify the `ENVIRONMENTS` constant within the source code:
+`src/components/Login.jsx` (or the corresponding login component file).
 
+## Troubleshooting
+
+* **Blank Screen**: If the application displays a blank screen on load, please refresh the page. This is a known state-initialization issue.
+* **Auth Errors**: Ensure your `access_token` is still active and hasn't expired on the main domain. If problems persist, try clearing your browser's local storage for the manager's tab.
