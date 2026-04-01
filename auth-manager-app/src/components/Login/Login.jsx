@@ -17,6 +17,7 @@ function Login() {
     'portal.pedscommons.org',
     'gearbox.pedscommons.org',
     'portal-dev.pedscommons.org',
+    'portal-staging.pedscommons.org',
     'gearbox-dev.pedscommons.org'
   ];
   const navigate = useNavigate();
