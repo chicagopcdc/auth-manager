@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './components/Login/Login';
 import Users from './components/Users/Users';
+import Clients from './components/Clients/Clients';
 import Permissions from './components/Permissions/Permissions';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Login />} />
         <Route path='/users' element={<Users />} />
+        <Route path='/clients' element={<Clients />} />
         <Route path='/permissions' element={<Permissions />} />
       </Routes>
 

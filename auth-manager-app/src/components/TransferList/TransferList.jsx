@@ -5,11 +5,18 @@ import { addPolicy, removePolicy } from '../Permissions/ChangePermissionsThunk';
 import { useDispatch, useSelector } from 'react-redux';
 import { displayPermissionsActions } from '../Permissions/PermissionsSlice';
 import { changePermissionsActions } from '../Permissions/ChangePermissionsSlice';
+import { clientsSliceActions } from '../Clients/ClientsSlice';
 import Modal from '../Modal/Modal';
 import { authExpire } from '../../utils';
 import { useNavigate } from 'react-router-dom';
 
-function TransferList({ title1, title2, initList }) {
+function TransferList({
+  title1,
+  title2,
+  initList,
+  subjectType,
+  subjectIdentifier
+}) {
   /**
    * @typedef {Object} selectedObject
    * @property {string[]} firstList
@@ -23,7 +30,6 @@ function TransferList({ title1, title2, initList }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const authKey = useSelector((state) => state.login.authKey);
-  const username = useSelector((state) => state.users.clickedUser.username);
   const envir = useSelector((state) => state.login.envir);
 
   const movableToSecond = selected.firstList.length > 0;
@@ -106,34 +112,80 @@ function TransferList({ title1, title2, initList }) {
     return { add, remove };
   }
 
-  function handleSavePermissions(
+  async function handleSavePermissions(
     authKey,
-    username,
     envir,
+    subjectType,
+    subjectIdentifier,
     initList,
     shuttleList
   ) {
-    // secondDiff returns a list of policies to add and remove
+    dispatch(changePermissionsActions.setStatus('idle'));
+    setErrMsg('');
+    dispatch(displayPermissionsActions.setSaveMsg(''));
+
     const secondDiff = arraysDiff(initList.secondList, shuttleList.secondList);
 
     if (secondDiff.add.length > 0) {
-      for (const pol_add of secondDiff.add) {
-        addNewPolicy({
+      if (subjectType === 'client') {
+        const addSucceeded = await addNewPolicies({
           authKey,
-          username,
           envir,
-          policy_name: pol_add
+          subjectType,
+          clientID: subjectIdentifier,
+          policy_names: secondDiff.add
         });
+
+        if (!addSucceeded) {
+          return;
+        }
+      } else {
+        for (const policyName of secondDiff.add) {
+          const addSucceeded = await addNewPolicies({
+            authKey,
+            envir,
+            subjectType,
+            username: subjectIdentifier,
+            policy_name: policyName
+          });
+
+          if (!addSucceeded) {
+            return;
+          }
+        }
       }
     }
+
     if (secondDiff.remove.length > 0) {
-      removePolicies({
+      const removeSucceeded = await removePolicies({
         authKey,
-        username,
         envir,
+        subjectType,
+        username: subjectType === 'user' ? subjectIdentifier : undefined,
+        clientID: subjectType === 'client' ? subjectIdentifier : undefined,
         policy_names: secondDiff.remove
       });
+
+      if (!removeSucceeded) {
+        return;
+      }
     }
+
+    if (subjectType === 'client') {
+      dispatch(
+        clientsSliceActions.setClientPolicies({
+          clientID: subjectIdentifier,
+          policies: shuttleList.secondList
+        })
+      );
+    }
+
+    dispatch(
+      displayPermissionsActions.setSaveMsg(
+        'This change was successfully saved.'
+      )
+    );
+    setInitialList(shuttleList);
   }
 
   /**
@@ -144,51 +196,72 @@ function TransferList({ title1, title2, initList }) {
    * @param {string} envir - the selected environment, from Login
    * @param {string[]} policy_names - the policy names you would like to remove
    */
-  async function removePolicies({ authKey, username, envir, policy_names }) {
+  async function removePolicies({
+    authKey,
+    envir,
+    subjectType,
+    username,
+    clientID,
+    policy_names
+  }) {
     const result = await dispatch(
-      removePolicy({ authKey, username, envir, policy_names })
+      removePolicy({
+        authKey,
+        envir,
+        subjectType,
+        username,
+        clientID,
+        policy_names
+      })
     );
+
     const statusNumber = result.payload;
+    const subjectLabel = subjectType === 'client' ? clientID : username;
+
     if (removePolicy.rejected.match(result)) {
       dispatch(changePermissionsActions.setStatus('failed'));
       setErrMsg(
-        `Status: ${statusNumber}. Failed to remove policies from username ${username}, in environment '${envir}'. `
+        `Status: ${statusNumber}. Failed to remove policies from ${subjectType} ${subjectLabel}, in environment '${envir}'.`
       );
-    } else if (removePolicy.fulfilled.match(result)) {
-      dispatch(
-        displayPermissionsActions.setSaveMsg(
-          'This change was successfully saved.'
-        )
-      );
-      setInitialList(shuttleList);
+      return false;
     }
+
+    return true;
   }
 
-  /**
-   * An async function that adds a new policy (only 1) by dispatching the addPolicy thunk
-   * @param {string} authKey - the authentication key, from Login
-   * @param {string} username - the username of the user row being clicked, from Users
-   * @param {string} envir - the selected environment, from Login
-   * @param {string[]} policy_name - the policy name you would like to add
-   */
-  async function addNewPolicy({ authKey, username, envir, policy_name }) {
+  async function addNewPolicies({
+    authKey,
+    envir,
+    subjectType,
+    username,
+    clientID,
+    policy_name,
+    policy_names
+  }) {
     const result = await dispatch(
-      addPolicy({ authKey, username, envir, policy_name })
+      addPolicy({
+        authKey,
+        envir,
+        subjectType,
+        username,
+        clientID,
+        policy_name,
+        policy_names
+      })
     );
+
     const statusNumber = result.payload;
+    const subjectLabel = subjectType === 'client' ? clientID : username;
+
     if (addPolicy.rejected.match(result)) {
       dispatch(changePermissionsActions.setStatus('failed'));
       setErrMsg(
-        `Status: ${statusNumber}. Failed to add policy '${policy_name}' to username ${username}, in environment '${envir}'.`
+        `Status: ${statusNumber}. Failed to add policies to ${subjectType} ${subjectLabel}, in environment '${envir}'.`
       );
-    } else if (addPolicy.fulfilled.match(result)) {
-      dispatch(
-        displayPermissionsActions.setSaveMsg(
-          'This change was successfully saved.'
-        )
-      );
-      setInitialList(shuttleList);
+      return false;
     }
+
+    return true;
   }
 
   function modalOnExit() {
@@ -231,8 +304,9 @@ function TransferList({ title1, title2, initList }) {
         onClick={() =>
           handleSavePermissions(
             authKey,
-            username,
             envir,
+            subjectType,
+            subjectIdentifier,
             initialList,
             shuttleList
           )

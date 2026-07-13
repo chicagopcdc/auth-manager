@@ -51,7 +51,7 @@ function Login() {
    * @param {string} envir - the selected environment, from Login
    */
   const handleSubmit = async (authKey, envir) => {
-    sessionStorage.removeItem('userInfo');
+    sessionStorage.removeItem('permissionSubject');
     dispatch(loginActions.setErrorMsg(''));
     const { isEmpty, msg } = isEmptyLogin(authKey, envir);
     if (isEmpty) {

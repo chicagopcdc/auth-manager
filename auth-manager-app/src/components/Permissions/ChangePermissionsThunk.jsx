@@ -1,82 +1,119 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-/**
- * Adds a new policy to a certain user
- * @param {string} authKey - the authentication key, from Login
- * @param {string} username - the username of the user row being clicked, from Users
- * @param {string} envir - the selected environment, from Login
- * @param {string} policy_name - the policy name we want to add to the user
- */
 export const addPolicy = createAsyncThunk(
   'changePermissions/addPolicy',
-  async ({ authKey, username, envir, policy_name }, { rejectWithValue }) => {
+  async (
+    {
+      authKey,
+      envir,
+      subjectType = 'user',
+      username,
+      clientID,
+      policy_name,
+      policy_names = []
+    },
+    { rejectWithValue }
+  ) => {
     try {
-      const url = `https://${envir}/user/admin/add_policy_to_user`;
+      const isClient = subjectType === 'client';
+      const policies = policy_names.length > 0 ? policy_names : [policy_name];
+
+      const url = isClient
+        ? `https://${envir}/user/admin/add_policies_to_client`
+        : `https://${envir}/user/admin/add_policy_to_user`;
+
+      const body = isClient
+        ? {
+            client_id: clientID,
+            policy_names: policies
+          }
+        : {
+            username,
+            policy_name
+          };
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authKey}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          policy_name: policy_name,
-          username: username
-        })
+        body: JSON.stringify(body)
       });
+
       if (!response.ok) {
         return rejectWithValue(response.status);
       }
+
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        return rejectWithValue(`Expected JSON, got: ${text.substring(0, 100)}`);
+        return rejectWithValue(
+          `Expected JSON, got: ${text.substring(0, 100)}`
+        );
       }
-      let json = await response.json();
-      return json;
-    } catch (e) {
-      return rejectWithValue(e.response?.status);
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error?.message || 'Unable to add policies');
     }
   }
 );
 
-/**
- * Removes policies from a certain user
- * @param {string} authKey - the authentication key, from Login
- * @param {string} username - the username of the user row being clicked, from Users
- * @param {string} envir - the selected environment, from Login
- * @param {string[]} policy_names - the policy names we want to add to the user
- */
 export const removePolicy = createAsyncThunk(
   'changePermissions/removePolicy',
   async (
-    { authKey, username, envir, policy_names = [] },
+    {
+      authKey,
+      envir,
+      subjectType = 'user',
+      username,
+      clientID,
+      policy_names = []
+    },
     { rejectWithValue }
   ) => {
     try {
-      const url = `https://${envir}/user/admin/revoke_permission`;
+      const isClient = subjectType === 'client';
+
+      const url = isClient
+        ? `https://${envir}/user/admin/remove_policies_from_client`
+        : `https://${envir}/user/admin/revoke_permission`;
+
+      const body = isClient
+        ? {
+            client_id: clientID,
+            policy_names
+          }
+        : {
+            username,
+            policy_names
+          };
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authKey}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          username: username,
-          policy_names: [...policy_names]
-        })
+        body: JSON.stringify(body)
       });
+
       if (!response.ok) {
         return rejectWithValue(response.status);
       }
+
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        return rejectWithValue(`Expected JSON, got: ${text.substring(0, 100)}`);
+        return rejectWithValue(
+          `Expected JSON, got: ${text.substring(0, 100)}`
+        );
       }
-      let json = await response.json();
-      return json;
-    } catch (e) {
-      return rejectWithValue(e.response?.status);
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error?.message || 'Unable to remove policies');
     }
   }
 );

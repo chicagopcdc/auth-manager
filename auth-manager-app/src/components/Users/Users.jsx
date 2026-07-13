@@ -53,7 +53,14 @@ function Users() {
       last_name: row[2],
       institution: row[3]
     };
-    setItemWithTimeout('userInfo', userInfo, 20);
+    setItemWithTimeout(
+      'permissionSubject',
+      {
+        subjectType: 'user',
+        subject: userInfo
+      },
+      20
+    );
     dispatch(displayPermissionsActions.setSaveMsg(''));
     dispatch(usersSliceActions.setClickedUser(userInfo));
     dispatch(fetchTotalPermissions({ authKey, envir }));
@@ -103,6 +110,11 @@ function Users() {
         <Modal errorMsg={errorMsg} onExit={() => setErrorMsg('')} />
       )}
       <br />
+
+      <Link to='/clients'>
+        <button>View Clients</button>
+      </Link>
+
       {status === 'loading' && userData.length == 0 && <Spinner />}
       {userData.length > 0 && (
         <>
@@ -121,7 +133,7 @@ function Users() {
         </>
       )}
       <Link to='/'>
-        <button onClick={clearLoginError}> Back to Login </button>
+        <button onClick={clearLoginError}>Back to Login</button>
       </Link>
     </>
   );
