@@ -8,7 +8,11 @@ import { loginActions } from '../Login/LoginSlice';
 import { displayPermissionsActions } from '../Permissions/PermissionsSlice';
 import { fetchTotalPermissions } from '../Permissions/PermissionsThunks';
 import { clientsSliceActions } from './ClientsSlice';
-import { fetchClients } from './ClientsThunk';
+import {
+  createClient,
+  fetchClients,
+  fetchFenceClients
+} from './ClientsThunk';
 import {
   authExpire,
   getItemWithTimeout,
@@ -25,6 +29,11 @@ function Clients() {
   const envir = useSelector((state) => state.login.envir);
 
   const [errorMsg, setErrorMsg] = useState('');
+  const [saveMsg, setSaveMsg] = useState('');
+  const [fenceClients, setFenceClients] = useState([]);
+  const [selectedClientID, setSelectedClientID] = useState('');
+  const [showCreateClient, setShowCreateClient] = useState(false);
+  const [isCreatingClient, setIsCreatingClient] = useState(false);
   const hasRequestedClients = useRef(false);
 
   const clientTableHeaders = ['Client name', 'Client ID'];
@@ -57,6 +66,81 @@ function Clients() {
     dispatch(fetchTotalPermissions({ authKey, envir }));
 
     navigate('/permissions');
+  }
+
+  async function handleShowCreateClient() {
+    setErrorMsg('');
+    setSaveMsg('');
+
+    const result = await dispatch(fetchFenceClients({ authKey, envir }));
+
+    if (fetchFenceClients.rejected.match(result)) {
+      if (result.payload === 401 || result.payload === 403) {
+        authExpire(dispatch, navigate);
+        return;
+      }
+
+      setErrorMsg('Unable to load clients from Fence.');
+      return;
+    }
+
+    const arboristClientIDs = new Set(
+      clients.map((client) => client.clientID)
+    );
+    const availableClients = result.payload
+      .map((client) => ({
+        ...client,
+        client_id: client.client_id || client.clientID
+      }))
+      .filter(
+        (client) =>
+          client.client_id && !arboristClientIDs.has(client.client_id)
+      );
+
+    setFenceClients(availableClients);
+    setSelectedClientID(availableClients[0]?.client_id || '');
+    setShowCreateClient(true);
+  }
+
+  async function handleCreateClient() {
+    if (!selectedClientID) {
+      return;
+    }
+
+    setErrorMsg('');
+    setSaveMsg('');
+    setIsCreatingClient(true);
+
+    const result = await dispatch(
+      createClient({
+        authKey,
+        envir,
+        clientID: selectedClientID
+      })
+    );
+
+    if (createClient.rejected.match(result)) {
+      setIsCreatingClient(false);
+
+      if (result.payload === 401 || result.payload === 403) {
+        authExpire(dispatch, navigate);
+        return;
+      }
+
+      setErrorMsg('Unable to create the client in Arborist.');
+      return;
+    }
+
+    const refreshResult = await dispatch(fetchClients({ authKey, envir }));
+    setIsCreatingClient(false);
+
+    if (fetchClients.rejected.match(refreshResult)) {
+      setErrorMsg('The client was created, but the client list could not be refreshed.');
+      return;
+    }
+
+    setShowCreateClient(false);
+    setSaveMsg('Client created in Arborist.');
   }
 
   useEffect(() => {
@@ -103,11 +187,41 @@ function Clients() {
         <Modal errorMsg={errorMsg} onExit={() => setErrorMsg('')} />
       )}
 
+      {saveMsg && <p>{saveMsg}</p>}
+
       <br />
 
       <Link to='/users'>
         <button>View Users</button>
       </Link>
+
+      <button onClick={handleShowCreateClient}>Create Client</button>
+
+      {showCreateClient && (
+        <div>
+          {fenceClients.length === 0 ? (
+            <p>All Fence clients already exist in Arborist.</p>
+          ) : (
+            <>
+              <label htmlFor='fence-client'>Fence client</label>
+              <select
+                id='fence-client'
+                value={selectedClientID}
+                onChange={(event) => setSelectedClientID(event.target.value)}>
+                {fenceClients.map((client) => (
+                  <option key={client.client_id} value={client.client_id}>
+                    {client.name || client.client_id} ({client.client_id})
+                  </option>
+                ))}
+              </select>
+              <button onClick={handleCreateClient} disabled={isCreatingClient}>
+                {isCreatingClient ? 'Creating…' : 'Create in Arborist'}
+              </button>
+            </>
+          )}
+          <button onClick={() => setShowCreateClient(false)}>Cancel</button>
+        </div>
+      )}
 
       {status === 'loading' && clients.length === 0 && <Spinner />}
 
