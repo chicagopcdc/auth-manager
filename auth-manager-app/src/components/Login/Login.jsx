@@ -18,7 +18,11 @@ function Login() {
     'gearbox.pedscommons.org',
     'portal-dev.pedscommons.org',
     'portal-staging.pedscommons.org',
-    'gearbox-dev.pedscommons.org'
+    'gearbox-dev.pedscommons.org',
+    // a locally run admin API, for working on this app without a Gen3 stack.
+    // import.meta.env.DEV is false in a production build, so this is dropped
+    // from the bundle the deploy workflow ships.
+    ...(import.meta.env.DEV ? ['localhost:8443'] : [])
   ];
   const navigate = useNavigate();
   const dispatch = useDispatch();
