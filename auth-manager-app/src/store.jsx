@@ -4,6 +4,7 @@ import usersReducer from './components/Users/UsersSlice';
 import clientsReducer from './components/Clients/ClientsSlice';
 import permissionsReducer from './components/Permissions/PermissionsSlice';
 import changePermissionsReducer from './components/Permissions/ChangePermissionsSlice';
+import manageReducer from './components/Manage/ManageSlice';
 
 const store = configureStore({
   reducer: {
@@ -11,7 +12,8 @@ const store = configureStore({
     users: usersReducer,
     clients: clientsReducer,
     displayPermissions: permissionsReducer,
-    changePermissions: changePermissionsReducer
+    changePermissions: changePermissionsReducer,
+    manage: manageReducer
   }
 });
 export default store;

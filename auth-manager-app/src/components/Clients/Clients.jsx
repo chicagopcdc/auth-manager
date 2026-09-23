@@ -195,6 +195,10 @@ function Clients() {
         <button>View Users</button>
       </Link>
 
+      <Link to='/manage'>
+        <button>Manage Permissions</button>
+      </Link>
+
       <button onClick={handleShowCreateClient}>Create Client</button>
 
       {showCreateClient && (

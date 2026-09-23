@@ -3,6 +3,7 @@ import Login from './components/Login/Login';
 import Users from './components/Users/Users';
 import Clients from './components/Clients/Clients';
 import Permissions from './components/Permissions/Permissions';
+import Manage from './components/Manage/Manage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path='/users' element={<Users />} />
         <Route path='/clients' element={<Clients />} />
         <Route path='/permissions' element={<Permissions />} />
+        <Route path='/manage' element={<Manage />} />
       </Routes>
 
       <footer style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.9rem' }}>
