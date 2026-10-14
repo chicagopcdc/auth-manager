@@ -85,10 +85,13 @@ const adminRequest = async (
 
     return await response.json();
   } catch (error) {
-    // never reached the server, so there is no status to report
+    // never got an answer, so there is no status to report
+    const timedOut = ['TimeoutError', 'AbortError'].includes(error?.name);
     return rejectWithValue({
       status: 0,
-      message: error?.message || 'The request could not be sent.'
+      message: timedOut
+        ? 'The server did not respond in time. Your authentication key may have expired, or the service may be restarting. Log in again and retry.'
+        : error?.message || 'The request could not be sent.'
     });
   }
 };
