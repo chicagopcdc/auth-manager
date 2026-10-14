@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginActions } from './LoginSlice';
+import { manageActions } from '../Manage/ManageSlice';
 import { fetchUsers } from '../Users/UsersThunk';
 import Spinner from '../Spinner/Spinner';
 import { setItemWithTimeout } from '../../utils';
@@ -18,7 +19,11 @@ function Login() {
     'gearbox.pedscommons.org',
     'portal-dev.pedscommons.org',
     'portal-staging.pedscommons.org',
-    'gearbox-dev.pedscommons.org'
+    'gearbox-dev.pedscommons.org',
+    // a locally run admin API, for working on this app without a Gen3 stack.
+    // import.meta.env.DEV is false in a production build, so this is dropped
+    // from the bundle the deploy workflow ships.
+    ...(import.meta.env.DEV ? ['localhost:8443'] : [])
   ];
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -52,6 +57,8 @@ function Login() {
    */
   const handleSubmit = async (authKey, envir) => {
     sessionStorage.removeItem('permissionSubject');
+    // whatever Manage loaded belongs to the previous login and environment
+    dispatch(manageActions.reset());
     dispatch(loginActions.setErrorMsg(''));
     const { isEmpty, msg } = isEmptyLogin(authKey, envir);
     if (isEmpty) {

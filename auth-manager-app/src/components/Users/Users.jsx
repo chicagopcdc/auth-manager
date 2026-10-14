@@ -115,6 +115,10 @@ function Users() {
         <button>View Clients</button>
       </Link>
 
+      <Link to='/manage'>
+        <button>Manage Permissions</button>
+      </Link>
+
       {status === 'loading' && userData.length == 0 && <Spinner />}
       {userData.length > 0 && (
         <>
