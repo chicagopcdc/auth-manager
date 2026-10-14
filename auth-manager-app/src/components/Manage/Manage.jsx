@@ -29,6 +29,17 @@ const TABS = [
   { key: 'resources', label: 'Resources' }
 ];
 
+/** Fetch one list, and send the person back to login if the key has expired. */
+const load = (dispatch, navigate, thunk, credentials) =>
+  dispatch(thunk(credentials)).then((result) => {
+    if (
+      thunk.rejected.match(result) &&
+      [401, 403].includes(result.payload?.status)
+    ) {
+      authExpire(dispatch, navigate);
+    }
+  });
+
 function Manage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -62,10 +73,14 @@ function Manage() {
 
   /** Everything is cross-referenced, so reload all three after any change. */
   const reloadAll = (credentials) => {
-    dispatch(fetchPolicies(credentials));
-    dispatch(fetchRoles(credentials));
-    dispatch(fetchResources(credentials));
+    load(dispatch, navigate, fetchPolicies, credentials);
+    load(dispatch, navigate, fetchRoles, credentials);
+    load(dispatch, navigate, fetchResources, credentials);
   };
+
+  const loadFailed = [policiesStatus, rolesStatus, resourcesStatus].includes(
+    'failed'
+  );
 
   useEffect(() => {
     const loginData = getItemWithTimeout('loginData');
@@ -78,30 +93,18 @@ function Manage() {
     dispatch(loginActions.setAuth(loginData.authKey));
     dispatch(loginActions.setEnvir(loginData.envir));
 
+    const credentials = {
+      authKey: loginData.authKey,
+      envir: loginData.envir
+    };
     if (policiesStatus === 'idle') {
-      dispatch(
-        fetchPolicies({
-          authKey: loginData.authKey,
-          envir: loginData.envir
-        })
-      ).then((result) => {
-        if (
-          fetchPolicies.rejected.match(result) &&
-          [401, 403].includes(result.payload?.status)
-        ) {
-          authExpire(dispatch, navigate);
-        }
-      });
+      load(dispatch, navigate, fetchPolicies, credentials);
     }
     if (rolesStatus === 'idle') {
-      dispatch(
-        fetchRoles({ authKey: loginData.authKey, envir: loginData.envir })
-      );
+      load(dispatch, navigate, fetchRoles, credentials);
     }
     if (resourcesStatus === 'idle') {
-      dispatch(
-        fetchResources({ authKey: loginData.authKey, envir: loginData.envir })
-      );
+      load(dispatch, navigate, fetchResources, credentials);
     }
   }, [dispatch, navigate, policiesStatus, rolesStatus, resourcesStatus]);
 
@@ -160,6 +163,13 @@ function Manage() {
       deleteRole({ authKey, envir, id, force: true })
     );
     setForceRolePrompt(null);
+
+    if (deleteRole.rejected.match(result)) {
+      if ([401, 403].includes(result.payload?.status)) {
+        authExpire(dispatch, navigate);
+      }
+      return;
+    }
 
     if (deleteRole.fulfilled.match(result)) {
       dispatch(
@@ -324,7 +334,14 @@ function Manage() {
 
       {loading && <Spinner />}
 
-      {!loading && rows[tab].length === 0 && (
+      {!loading && loadFailed && (
+        <p>
+          Some of this could not be loaded, so what is shown may be incomplete.{' '}
+          <button onClick={() => reloadAll({ authKey, envir })}>Retry</button>
+        </p>
+      )}
+
+      {!loading && !loadFailed && rows[tab].length === 0 && (
         <p>Nothing has been defined here yet.</p>
       )}
 

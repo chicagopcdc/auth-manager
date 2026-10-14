@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginActions } from './LoginSlice';
+import { manageActions } from '../Manage/ManageSlice';
 import { fetchUsers } from '../Users/UsersThunk';
 import Spinner from '../Spinner/Spinner';
 import { setItemWithTimeout } from '../../utils';
@@ -56,6 +57,8 @@ function Login() {
    */
   const handleSubmit = async (authKey, envir) => {
     sessionStorage.removeItem('permissionSubject');
+    // whatever Manage loaded belongs to the previous login and environment
+    dispatch(manageActions.reset());
     dispatch(loginActions.setErrorMsg(''));
     const { isEmpty, msg } = isEmptyLogin(authKey, envir);
     if (isEmpty) {

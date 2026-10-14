@@ -17,18 +17,31 @@ const errorFromResponse = async (response) => {
   const fallback = `The change did not go through (${response.status}).`;
   try {
     const text = await response.text();
-    const match = text.match(/<p class="introduction">([^<]+)<\/p>/);
+    // The page shows the error id in the first `introduction` paragraph and the
+    // message in the one after the "Error Message:" label, so anchor on the
+    // label rather than taking the first paragraph.
+    const match = text.match(
+      /Error Message:<\/p>\s*<p class="introduction">([^<]+)<\/p>/
+    );
     if (match) {
-      return { status: response.status, message: match[1].trim() };
+      return { status: response.status, message: decodeEntities(match[1]) };
     }
     const json = JSON.parse(text);
+    const detail = json?.error?.message ?? json?.error;
     return {
       status: response.status,
-      message: json?.error?.message || json?.error || fallback
+      message: typeof detail === 'string' && detail ? detail : fallback
     };
   } catch {
     return { status: response.status, message: fallback };
   }
+};
+
+/** Fence escapes the message for HTML, so "it's" arrives as "it&#39;s". */
+const decodeEntities = (html) => {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = html;
+  return textarea.value.trim();
 };
 
 /**
@@ -53,7 +66,12 @@ const adminRequest = async (
         ...(body ? { 'Content-Type': 'application/json' } : {})
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
-      signal: AbortSignal.timeout(15000)
+      // Only reads are given a deadline. A write that times out may still have
+      // been applied, and reporting it as failed invites a duplicate retry.
+      // AbortSignal.timeout is missing from older browsers, so check for it.
+      ...(method === 'GET' && AbortSignal.timeout
+        ? { signal: AbortSignal.timeout(15000) }
+        : {})
     });
 
     if (!response.ok) {
@@ -194,8 +212,13 @@ export const deleteResource = createAsyncThunk(
       {
         authKey,
         envir,
-        // the path is already absolute and fence matches it with <path:resource>
-        path: `remove_resource/${path.replace(/^\//, '')}`,
+        // the path is already absolute and fence matches it with <path:resource>;
+        // encode each segment so a name with ?, # or % stays in the path
+        path: `remove_resource/${path
+          .replace(/^\//, '')
+          .split('/')
+          .map(encodeURIComponent)
+          .join('/')}`,
         method: 'DELETE'
       },
       thunkAPI
