@@ -6,7 +6,7 @@ import { useState } from 'react';
  * parent it has never heard of.
  *
  * @param {Object} props
- * @param {Object[]} props.resources - from list_resources
+ * @param {Object[]} props.resources - from list_resources, without the subtrees in config/resources.js
  * @param {boolean} props.busy
  * @param {function} props.onCreate - ({ parentPath, name, description })
  * @param {function} props.onCancel

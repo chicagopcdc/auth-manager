@@ -7,7 +7,7 @@ import { useState } from 'react';
  *
  * @param {Object} props
  * @param {Object[]} props.roles - from list_roles
- * @param {Object[]} props.resources - from list_resources
+ * @param {Object[]} props.resources - from list_resources, without the subtrees in config/resources.js
  * @param {boolean} props.busy
  * @param {function} props.onCreate - ({ id, description, resourcePaths, roleIds })
  * @param {function} props.onCancel
