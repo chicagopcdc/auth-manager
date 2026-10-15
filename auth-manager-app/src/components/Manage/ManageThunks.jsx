@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { EXCLUDED_RESOURCE_SUBTREES } from '../../config/resources';
 
 /**
  * Fence renders its errors as an HTML page rather than JSON, so the useful part
@@ -112,10 +113,22 @@ export const fetchRoles = createAsyncThunk(
     adminRequest({ authKey, envir, path: 'list_roles' }, thunkAPI)
 );
 
+/** Everything except the subtrees named in config/resources.js. */
 export const fetchResources = createAsyncThunk(
   'manage/fetchResources',
-  ({ authKey, envir }, thunkAPI) =>
-    adminRequest({ authKey, envir, path: 'list_resources' }, thunkAPI)
+  ({ authKey, envir }, thunkAPI) => {
+    const query = EXCLUDED_RESOURCE_SUBTREES.map(
+      (path) => `exclude=${encodeURIComponent(path)}`
+    ).join('&');
+    return adminRequest(
+      {
+        authKey,
+        envir,
+        path: query ? `list_resources?${query}` : 'list_resources'
+      },
+      thunkAPI
+    );
+  }
 );
 
 /**
